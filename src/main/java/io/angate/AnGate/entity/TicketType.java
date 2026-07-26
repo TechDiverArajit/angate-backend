@@ -1,10 +1,16 @@
 package io.angate.AnGate.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.math.BigDecimal;
 
 @Entity
+@Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class TicketType extends BaseEntity {
     @Column(nullable = false)
     private String name;

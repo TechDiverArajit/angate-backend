@@ -1,5 +1,6 @@
 package io.angate.AnGate.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -13,13 +14,14 @@ import lombok.*;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class User extends BaseEntity{
+public class User extends BaseEntity {
 
     @NotBlank
     private String fullName;
     @NotNull
     private String emailId;
     @NotNull
+    @JsonIgnore
     private String password;
 
     @Enumerated(EnumType.STRING)
@@ -28,6 +30,8 @@ public class User extends BaseEntity{
     @Builder.Default
     @Enumerated(EnumType.ORDINAL)
     private Role role = Role.USER;
+
+    private Boolean isActive;
 
     public enum Gender{
         MALE,

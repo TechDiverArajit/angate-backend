@@ -30,13 +30,13 @@ public class Event extends BaseEntity {
     private LocalDateTime startTime;
 
     @Builder.Default
-    @Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Status status = Status.UPCOMING;
 
     @JsonIgnore
     @OneToMany(mappedBy = "event" , cascade = CascadeType.ALL , orphanRemoval = true)
-    private List<TicketType> type = new ArrayList<>();
+    private List<TicketType> ticketTypes = new ArrayList<>();
 
     public enum Status{
         UPCOMING,
