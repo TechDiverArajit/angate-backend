@@ -1,0 +1,23 @@
+package io.angate.AnGate.exception;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<ApiError> handleOptimisticLockFailure(ObjectOptimisticLockingFailureException e){
+        ApiError apiError = ApiError.builder()
+                .Message("Another user booked this ticket before you. Please try again.")
+                .httpStatus(HttpStatus.CONFLICT)
+                .build();
+
+        return new ResponseEntity<>(apiError,HttpStatus.CONFLICT);
+
+    }
+
+}

@@ -12,6 +12,10 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TicketType extends BaseEntity {
+
+    @Version
+    private Long version;
+
     @Column(nullable = false)
     private String name;
     @Column(nullable = false)

@@ -1,12 +1,9 @@
 package io.angate.AnGate.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Builder
@@ -18,7 +15,7 @@ public class Booking extends BaseEntity{
 
     @JoinColumn(name = "user_id",nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
-    private User user;
+    private Users users;
 
     @JoinColumn(name = "ticket_type_id" , nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
@@ -29,7 +26,7 @@ public class Booking extends BaseEntity{
 
     @Builder.Default
     @Enumerated(EnumType.STRING)
-    private Status status = Status.PENDING;
+    private Status status = Status.CONFIRMED;
 
     public enum Status{
         PENDING,
