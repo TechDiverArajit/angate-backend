@@ -4,12 +4,16 @@ import io.angate.AnGate.dto.event.EventRequest;
 import io.angate.AnGate.dto.event.EventResponse;
 import io.angate.AnGate.dto.tickettype.TicketTypeRequest;
 import io.angate.AnGate.dto.tickettype.TicketTypeResponse;
+import io.angate.AnGate.entity.Booking;
 import io.angate.AnGate.entity.Event;
 import io.angate.AnGate.entity.TicketType;
 import io.angate.AnGate.repository.EventRepository;
 import io.angate.AnGate.repository.TicketTypeRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Array;
@@ -40,5 +44,12 @@ public class EventService {
     public EventResponse getEventById(Long eventId) {
         Event event = eventRepository.findById(eventId).orElseThrow();
         return modelMapper.map(event,EventResponse.class);
+    }
+
+    public Page<EventResponse> getAllEvent(int page , int size) {
+        Pageable pageable = PageRequest.of(page,size);
+        Page<Event> events = eventRepository.findAll(pageable);
+        return events.map(event -> modelMapper.map(event,EventResponse.class));
+
     }
 }

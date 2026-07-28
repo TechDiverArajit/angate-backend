@@ -6,10 +6,13 @@ import io.angate.AnGate.dto.event.EventResponse;
 import io.angate.AnGate.dto.tickettype.TicketTypeRequest;
 import io.angate.AnGate.service.EventService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.awt.print.Pageable;
 import java.util.List;
 
 @RestController
@@ -22,6 +25,12 @@ public class EventController {
     @GetMapping("/{eventId}")
     public ResponseEntity<EventResponse> getEventById(@PathVariable Long eventId){
         return ResponseEntity.ok(eventService.getEventById(eventId));
+    }
+
+    @GetMapping("/allEvents")
+    public ResponseEntity<Page<EventResponse>> getAllEvent(@RequestParam(defaultValue = "0") int page,
+                                                            @RequestParam(defaultValue = "10") int size){
+        return ResponseEntity.ok(eventService.getAllEvent(page,size));
     }
 
 
