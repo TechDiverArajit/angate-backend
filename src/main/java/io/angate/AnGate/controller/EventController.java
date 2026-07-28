@@ -1,5 +1,6 @@
 package io.angate.AnGate.controller;
 
+import io.angate.AnGate.dto.booking.BookingResponse;
 import io.angate.AnGate.dto.event.EventRequest;
 import io.angate.AnGate.dto.event.EventResponse;
 import io.angate.AnGate.dto.tickettype.TicketTypeRequest;
@@ -23,8 +24,12 @@ public class EventController {
         return ResponseEntity.ok(eventService.getEventById(eventId));
     }
 
+
+
     @PostMapping("/createEvent")
     public ResponseEntity<EventResponse> createEvent(@RequestBody EventRequest eventRequest ){
         return new ResponseEntity<>(eventService.createEvent(eventRequest), HttpStatus.CREATED);
     }
+
+
 }

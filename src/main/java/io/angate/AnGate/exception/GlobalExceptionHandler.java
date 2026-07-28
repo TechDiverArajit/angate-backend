@@ -20,4 +20,15 @@ public class GlobalExceptionHandler {
 
     }
 
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ApiError> ResourceNotFoundException(ResourceNotFoundException e){
+        ApiError apiError = ApiError.builder()
+                .Message(e.getMessage())
+                .httpStatus(HttpStatus.NOT_FOUND)
+                .build();
+
+        return new ResponseEntity<>(apiError,HttpStatus.NOT_FOUND);
+
+    }
+
 }
