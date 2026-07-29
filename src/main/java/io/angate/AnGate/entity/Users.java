@@ -1,6 +1,7 @@
 package io.angate.AnGate.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.angate.AnGate.entity.enums.UserStatus;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -28,10 +29,12 @@ public class Users extends BaseEntity {
     private Gender gender;
 
     @Builder.Default
-    @Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING)
     private Role role = Role.USER;
 
-    private Boolean isActive;
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    private UserStatus status = UserStatus.ACTIVE;
 
     public enum Gender{
         MALE,

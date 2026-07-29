@@ -31,7 +31,8 @@ public class Booking extends BaseEntity{
     public enum Status{
         PENDING,
         CONFIRMED,
-        FAILED
+        FAILED,
+        REFUNDED
     }
 
 }

@@ -29,6 +29,9 @@ public class Event extends BaseEntity {
     @NotNull
     private LocalDateTime startTime;
 
+    private Boolean active = true;
+
+
     @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -38,11 +41,26 @@ public class Event extends BaseEntity {
     @OneToMany(mappedBy = "event" , cascade = CascadeType.ALL , orphanRemoval = true)
     private List<TicketType> ticketTypes = new ArrayList<>();
 
+
+    public Status fetchStatus(){
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime endTime = this.startTime.plusHours(5);
+        if(now.isBefore(this.startTime)){
+            return Status.UPCOMING;
+        } else if (now.isAfter(endTime)) {
+            return Status.COMPLETED;
+        }
+        return Status.LIVE;
+    }
+
+
     public enum Status{
         UPCOMING,
-        STARTED,
+        LIVE,
         COMPLETED,
         CANCELLED
     }
+
+
 }
 

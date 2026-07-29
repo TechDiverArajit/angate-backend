@@ -41,4 +41,14 @@ public class EventController {
     }
 
 
+    @PutMapping("/update_event/{event_id}")
+    public ResponseEntity<EventResponse> updateEvent(@RequestBody EventRequest eventRequest,
+                                                     @PathVariable Long event_id ){
+        return new ResponseEntity<>(eventService.updateEvent(eventRequest , event_id ),HttpStatus.ACCEPTED);
+    }
+
+
+//    @DeleteMapping("/delete_event/{e_id}")
+//    public ResponseEntity<HttpStatus> deleteAnEvent()
+
 }

@@ -3,6 +3,7 @@ package io.angate.AnGate.service;
 import io.angate.AnGate.dto.user.UserRequest;
 import io.angate.AnGate.dto.user.UserResponse;
 import io.angate.AnGate.entity.Users;
+import io.angate.AnGate.entity.enums.UserStatus;
 import io.angate.AnGate.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -29,6 +30,8 @@ public class UserService {
         }
 
         Users userTobeSaved = modelMapper.map(userRequest, Users.class);
+        userTobeSaved.setRole(Users.Role.USER);
+        userTobeSaved.setStatus(UserStatus.ACTIVE);
 
 //        Users userTobeSaved = Users.builder()
 //                .fullName(userRequest.getFullName())

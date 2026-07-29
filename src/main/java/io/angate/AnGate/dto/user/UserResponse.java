@@ -9,6 +9,6 @@ public class UserResponse {
     private String fullName;
     private String emailId;
     private Users.Gender gender;
-    private Boolean isActive;
+
 
 }
