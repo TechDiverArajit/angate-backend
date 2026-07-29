@@ -31,4 +31,15 @@ public class GlobalExceptionHandler {
 
     }
 
+    @ExceptionHandler(BookingExistsDeletionException.class)
+    public ResponseEntity<ApiError> ExistingBookingsDeletion(BookingExistsDeletionException e){
+        ApiError apiError = ApiError.builder()
+                .Message(e.getMessage())
+                .httpStatus(HttpStatus.CONFLICT)
+                .build();
+        return new ResponseEntity<>(apiError , HttpStatus.CONFLICT);
+    }
+
+
+
 }

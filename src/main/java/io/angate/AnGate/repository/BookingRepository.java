@@ -12,4 +12,5 @@ import java.util.Optional;
 public interface BookingRepository extends JpaRepository<Booking , Long> {
 
     List<Booking> findByUsersId(Long id);
+    boolean existsByTicketTypeEventId(Long eventId);
 }

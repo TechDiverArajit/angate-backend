@@ -12,4 +12,5 @@ import java.util.Optional;
 public interface EventRepository extends JpaRepository<Event , Long> {
 
     List<Event> findByStatusNotIn(Collection<Event.Status> statuses);
+
 }
