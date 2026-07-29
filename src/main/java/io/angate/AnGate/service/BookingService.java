@@ -2,10 +2,12 @@ package io.angate.AnGate.service;
 
 import io.angate.AnGate.dto.booking.BookingRequest;
 import io.angate.AnGate.dto.booking.BookingResponse;
+import io.angate.AnGate.dto.booking.BookingStatusRequest;
 import io.angate.AnGate.entity.Booking;
 import io.angate.AnGate.entity.Event;
 import io.angate.AnGate.entity.TicketType;
 import io.angate.AnGate.entity.Users;
+import io.angate.AnGate.exception.BookingExistsDeletionException;
 import io.angate.AnGate.exception.ResourceNotFoundException;
 import io.angate.AnGate.repository.BookingRepository;
 import io.angate.AnGate.repository.EventRepository;
@@ -94,5 +96,32 @@ public class BookingService {
                 .collect(Collectors.toList());
 
         return bookingResponses;
+    }
+
+    @Transactional
+    public BookingResponse updateBookingStatus(Long b_id, BookingStatusRequest request) {
+        Booking booking = bookingRepository.findById(b_id)
+                .orElseThrow(() -> new ResourceNotFoundException("No bookings found"));
+        if(booking.getStatus()== Booking.Status.REFUNDED){
+            throw new BookingExistsDeletionException("Refunded,Cannot be Updated");
+        }
+
+        Booking.Status oldStatus = booking.getStatus();
+        Booking.Status newStatus = request.getStatus();
+        booking.setStatus(newStatus);
+
+        if(oldStatus!= Booking.Status.REFUNDED && newStatus== Booking.Status.REFUNDED){
+            TicketType ticketType = booking.getTicketType();
+            ticketType.setAvailableTickets(ticketType.getAvailableTickets()+booking.getQuantity());
+            ticketTypeRepository.save(ticketType);
+
+        }
+        Booking booking1 = bookingRepository.save(booking);
+
+        BookingResponse bookingResponse = modelMapper.map(booking1,BookingResponse.class);
+        bookingResponse.setUserId(booking1.getUsers().getId());
+        bookingResponse.setTicketTypeId(booking1.getTicketType().getId());
+        bookingResponse.setEventTitle(booking1.getTicketType().getEvent().getTitle());
+        return bookingResponse;
     }
 }
