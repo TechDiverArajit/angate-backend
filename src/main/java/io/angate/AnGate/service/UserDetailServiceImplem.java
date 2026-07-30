@@ -1,5 +1,6 @@
 package io.angate.AnGate.service;
 
+import io.angate.AnGate.exception.ResourceNotFoundException;
 import io.angate.AnGate.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,6 +14,7 @@ public class UserDetailServiceImplem implements UserDetailsService {
     private final UserRepository userRepository;
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return  userRepository.findByEmailId(username).get();
+        return  userRepository.findByEmailId(username)
+                .orElseThrow(()-> new ResourceNotFoundException("No user found with username: "+username));
     }
 }

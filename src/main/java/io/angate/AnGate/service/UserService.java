@@ -9,6 +9,8 @@ import io.angate.AnGate.entity.enums.UserStatus;
 import io.angate.AnGate.exception.BookingExistsDeletionException;
 import io.angate.AnGate.exception.ResourceNotFoundException;
 import io.angate.AnGate.repository.UserRepository;
+import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -31,11 +33,11 @@ public class UserService {
 
     private final AuthenticationManager authenticationManager;
 
-
+    private final JwtService jwtService;
 
 
     public UserResponse getUserById(Long userId){
-        Users user = userRepository.findById(userId).orElseThrow();
+        Users user = userRepository.findById(userId).orElseThrow(()->new ResourceNotFoundException("No user exists"));
         return modelMapper.map(user,UserResponse.class);
     }
 
@@ -57,7 +59,24 @@ public class UserService {
         Authentication authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(request.getEmailId(), request.getPassword()));
         Users users = (Users) authentication.getPrincipal();
-        return new AuthResponse(users.getId(), users.getEmailId());
+        String accessToken = jwtService.generateAccessToken(users);
+        String refreshToken = jwtService.generateRefreshToken(users);
+        Claims claims = jwtService.extractClaim(accessToken);
+        return new AuthResponse(users.getId(),accessToken,refreshToken,claims.getExpiration());
+    }
+
+
+
+    public AuthResponse refresh(String refreshToken){
+        Claims claims1 = jwtService.extractClaim(refreshToken);
+        if(!"refresh".equals(claims1.get("type"))){
+            throw new RuntimeException("Invalid refresh token");
+        }
+        Long id = jwtService.getUserIdFromToken(refreshToken);
+        Users users = userRepository.findById(id)
+                .orElseThrow(()-> new ResourceNotFoundException("no user exists"));
+        String accessToken = jwtService.generateAccessToken(users);
+        return new AuthResponse(users.getId(),accessToken,refreshToken,claims1.getExpiration());
     }
 
 

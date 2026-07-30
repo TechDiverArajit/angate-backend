@@ -4,11 +4,17 @@ import io.angate.AnGate.dto.Auth.AuthRequest;
 import io.angate.AnGate.dto.Auth.AuthResponse;
 import io.angate.AnGate.dto.user.UserRequest;
 import io.angate.AnGate.dto.user.UserResponse;
+import io.angate.AnGate.exception.ResourceNotFoundException;
 import io.angate.AnGate.service.UserService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.lang.reflect.Array;
+import java.util.Arrays;
 
 @RestController
 @RequestMapping("/auth")
@@ -30,5 +36,22 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request){
         return ResponseEntity.ok(userService.login(request));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponse> refresh(HttpServletRequest request){
+        System.out.println("Refresh endpoint reached");
+        System.out.println("Cookie header: " + request.getHeader("Cookie"));
+        Cookie[] cookies = request.getCookies();
+        if(cookies==null){
+            throw new ResourceNotFoundException("No cookies found");
+        }
+        String refreshToken = Arrays.stream(cookies)
+                .filter(cookie -> "refreshToken".equals(cookie.getName()))
+                .findFirst()
+                .map(Cookie::getValue)
+                .orElseThrow(() -> new ResourceNotFoundException("Refresh token cookie not found"));
+        AuthResponse authResponse = userService.refresh(refreshToken);
+        return ResponseEntity.ok(authResponse);
     }
 }
