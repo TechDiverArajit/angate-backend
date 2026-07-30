@@ -1,5 +1,7 @@
 package io.angate.AnGate.controller;
 
+import io.angate.AnGate.dto.Auth.AuthRequest;
+import io.angate.AnGate.dto.Auth.AuthResponse;
 import io.angate.AnGate.dto.user.UserRequest;
 import io.angate.AnGate.dto.user.UserResponse;
 import io.angate.AnGate.service.UserService;
@@ -23,5 +25,10 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<UserResponse> register(@RequestBody UserRequest userRequest) throws Exception{
         return new ResponseEntity<>(userService.register(userRequest), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request){
+        return ResponseEntity.ok(userService.login(request));
     }
 }

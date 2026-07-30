@@ -1,15 +1,24 @@
 package io.angate.AnGate.service;
 
+import io.angate.AnGate.dto.Auth.AuthRequest;
+import io.angate.AnGate.dto.Auth.AuthResponse;
 import io.angate.AnGate.dto.user.UserRequest;
 import io.angate.AnGate.dto.user.UserResponse;
 import io.angate.AnGate.entity.Users;
 import io.angate.AnGate.entity.enums.UserStatus;
+import io.angate.AnGate.exception.BookingExistsDeletionException;
+import io.angate.AnGate.exception.ResourceNotFoundException;
 import io.angate.AnGate.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import javax.security.auth.login.CredentialException;
 
 @Service
 @RequiredArgsConstructor
@@ -18,31 +27,39 @@ public class UserService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
 
+    private final PasswordEncoder passwordEncoder;
+
+    private final AuthenticationManager authenticationManager;
+
+
+
 
     public UserResponse getUserById(Long userId){
         Users user = userRepository.findById(userId).orElseThrow();
         return modelMapper.map(user,UserResponse.class);
     }
 
-    public UserResponse register(UserRequest userRequest) throws CredentialException {
+    public UserResponse register(UserRequest userRequest)  {
         if (userRepository.findByEmailId(userRequest.getEmailId()).isPresent()) {
-            throw new CredentialException("Email already in use");
+            throw new BookingExistsDeletionException("Email already in use");
         }
-
         Users userTobeSaved = modelMapper.map(userRequest, Users.class);
         userTobeSaved.setRole(Users.Role.USER);
         userTobeSaved.setStatus(UserStatus.ACTIVE);
-
-//        Users userTobeSaved = Users.builder()
-//                .fullName(userRequest.getFullName())
-//                .emailId(userRequest.getEmailId())
-//                .password(userRequest.getPassword())
-//                .gender(userRequest.getGender())
-//                .isActive(Boolean.TRUE)
-//                .build();
+        userTobeSaved.setPassword(passwordEncoder.encode(userRequest.getPassword()));
         Users user = userRepository.save(userTobeSaved);
         return modelMapper.map(user, UserResponse.class);
     }
+
+    public AuthResponse login(AuthRequest request) {
+//        Users user = userRepository.findByEmailId(request.getEmailId())
+//                .orElseThrow(()-> new ResourceNotFoundException("No user found with EmailID: "+request.getEmailId()));
+        Authentication authentication = authenticationManager
+                .authenticate(new UsernamePasswordAuthenticationToken(request.getEmailId(), request.getPassword()));
+        Users users = (Users) authentication.getPrincipal();
+        return new AuthResponse(users.getId(), users.getEmailId());
+    }
+
 
 }
 

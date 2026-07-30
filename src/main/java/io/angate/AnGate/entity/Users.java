@@ -8,6 +8,11 @@ import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 @Entity
 @Builder
@@ -15,7 +20,7 @@ import lombok.*;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Users extends BaseEntity {
+public class Users extends BaseEntity implements UserDetails {
 
     @NotBlank
     private String fullName;
@@ -35,6 +40,16 @@ public class Users extends BaseEntity {
     @Builder.Default
     @Enumerated(EnumType.STRING)
     private UserStatus status = UserStatus.ACTIVE;
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return new ArrayList<>();
+    }
+
+    @Override
+    public String getUsername() {
+        return this.emailId;
+    }
 
     public enum Gender{
         MALE,
