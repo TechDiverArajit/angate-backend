@@ -2,9 +2,7 @@ package io.angate.AnGate.service;
 
 import io.angate.AnGate.dto.event.EventRequest;
 import io.angate.AnGate.dto.event.EventResponse;
-import io.angate.AnGate.dto.tickettype.TicketTypeRequest;
-import io.angate.AnGate.dto.tickettype.TicketTypeResponse;
-import io.angate.AnGate.entity.Booking;
+
 import io.angate.AnGate.entity.Event;
 import io.angate.AnGate.entity.TicketType;
 import io.angate.AnGate.exception.BookingExistsDeletionException;
@@ -21,13 +19,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-
-import java.lang.reflect.Array;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
 
 @Service
 @RequiredArgsConstructor

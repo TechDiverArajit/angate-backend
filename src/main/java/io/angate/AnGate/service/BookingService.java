@@ -4,19 +4,19 @@ import io.angate.AnGate.dto.booking.BookingRequest;
 import io.angate.AnGate.dto.booking.BookingResponse;
 import io.angate.AnGate.dto.booking.BookingStatusRequest;
 import io.angate.AnGate.entity.Booking;
-import io.angate.AnGate.entity.Event;
+
 import io.angate.AnGate.entity.TicketType;
 import io.angate.AnGate.entity.Users;
 import io.angate.AnGate.exception.BookingExistsDeletionException;
 import io.angate.AnGate.exception.ResourceNotFoundException;
 import io.angate.AnGate.repository.BookingRepository;
-import io.angate.AnGate.repository.EventRepository;
+
 import io.angate.AnGate.repository.TicketTypeRepository;
 import io.angate.AnGate.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
+
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -31,7 +31,6 @@ public class BookingService {
     private final UserRepository userRepository;
     private final TicketTypeRepository ticketTypeRepository;
     private final ModelMapper modelMapper;
-    private final EventRepository eventRepository;
 
 
     @Transactional
@@ -85,7 +84,8 @@ public class BookingService {
     public List<BookingResponse> findBookingsByUserId(Long user_id){
         Users users = userRepository.findById(user_id).orElseThrow(() -> new ResourceNotFoundException("No user found with id: "+ user_id));
         List<Booking> bookings = bookingRepository.findByUsersId(users.getId());
-        List<BookingResponse> bookingResponses = bookings.stream()
+
+        return bookings.stream()
                 .map(booking -> {
                     BookingResponse bookingResponse = modelMapper.map(booking,BookingResponse.class);
                     bookingResponse.setUserId(booking.getUsers().getId());
@@ -94,8 +94,6 @@ public class BookingService {
                     return bookingResponse;
                 })
                 .collect(Collectors.toList());
-
-        return bookingResponses;
     }
 
     @Transactional
