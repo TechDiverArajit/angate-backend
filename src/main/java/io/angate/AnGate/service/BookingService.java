@@ -122,4 +122,17 @@ public class BookingService {
         bookingResponse.setEventTitle(booking1.getTicketType().getEvent().getTitle());
         return bookingResponse;
     }
+
+    public List<BookingResponse> getAllBookings() {
+        List<Booking> bookings = bookingRepository.findAll();
+        return bookings.stream()
+                .map(booking -> {
+                    BookingResponse bookingResponse = modelMapper.map(booking,BookingResponse.class);
+                    bookingResponse.setUserId(booking.getUsers().getId());
+                    bookingResponse.setEventTitle(booking.getTicketType().getEvent().getTitle());
+                    bookingResponse.setTicketTypeId(booking.getTicketType().getId());
+                    return bookingResponse;
+                })
+                .collect(Collectors.toList());
+    }
 }

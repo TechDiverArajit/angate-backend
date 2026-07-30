@@ -31,6 +31,11 @@ public class BookingController {
         return ResponseEntity.ok(bookingService.findBookingsByUserId(user_id));
     }
 
+    @GetMapping("/all")
+    public ResponseEntity<List<BookingResponse>> getAllBookings(){
+        return ResponseEntity.ok(bookingService.getAllBookings());
+    }
+
     @PostMapping("/createBooking")
     public ResponseEntity<BookingResponse> bookAnEvent(@RequestBody BookingRequest bookingRequest) throws InterruptedException {
         return new ResponseEntity<>(bookingService.bookAnEvent(bookingRequest), HttpStatus.CREATED);
