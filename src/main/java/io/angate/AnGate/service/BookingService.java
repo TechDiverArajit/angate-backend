@@ -34,13 +34,10 @@ public class BookingService {
 
 
     @Transactional
-    public BookingResponse bookAnEvent(BookingRequest bookingRequest) throws InterruptedException {
+    public BookingResponse bookAnEvent(BookingRequest bookingRequest , Users users) throws InterruptedException {
 
-            Users users = userRepository.findById(bookingRequest.getUserId())
-                    .orElseThrow(()-> new IllegalArgumentException("Invalid user id"));
             TicketType ticketType = ticketTypeRepository.findById(bookingRequest.getTicketTypeId())
                     .orElseThrow(()-> new IllegalArgumentException("Ticket id doesn't exists"));
-        Thread.sleep(3000);
         if(bookingRequest.getQuantity()>ticketType.getAvailableTickets()){
                 throw new IllegalStateException("sorry only "+ticketType.getAvailableTickets()+" tickets are available");
             }
@@ -56,16 +53,11 @@ public class BookingService {
                     .quantity(bookingRequest.getQuantity())
                     .totalPrice(totalPrice)
                     .build();
-
-            System.out.println(bookingToSaved.getUsers());
-            System.out.println(bookingToSaved.getTicketType());
-
-            ticketTypeRepository.save(ticketType);
             Booking booking = bookingRepository.save(bookingToSaved);
             BookingResponse bookingResponse = modelMapper.map(booking,BookingResponse.class);
             bookingResponse.setEventTitle(ticketType.getEvent().getTitle());
-            bookingResponse.setUserId(booking.getUsers().getId());
-            bookingResponse.setTicketTypeId(booking.getTicketType().getId());
+            bookingResponse.setUserId(users.getId());
+            bookingResponse.setTicketTypeId(ticketType.getId());
             return bookingResponse;
 
     }

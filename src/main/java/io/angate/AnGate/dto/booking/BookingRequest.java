@@ -6,8 +6,7 @@ import lombok.Data;
 
 @Data
 public class BookingRequest {
-    @NotNull(message = "user is required")
-    private Long userId;
+
     @NotNull(message = "ticketType is required")
     private Long ticketTypeId;
     @Min(value = 1,message = "min 1 quantity required")

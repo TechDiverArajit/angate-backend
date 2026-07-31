@@ -8,9 +8,11 @@ import io.angate.AnGate.exception.ResourceNotFoundException;
 import io.angate.AnGate.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.lang.reflect.Array;
@@ -53,5 +55,18 @@ public class UserController {
                 .orElseThrow(() -> new ResourceNotFoundException("Refresh token cookie not found"));
         AuthResponse authResponse = userService.refresh(refreshToken);
         return ResponseEntity.ok(authResponse);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(HttpServletResponse response){
+        Cookie cookie = new Cookie("refreshToken",null);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false);
+        cookie.setPath("/auth");
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
+
+        SecurityContextHolder.clearContext();
+        return ResponseEntity.ok("Logout successfully");
     }
 }
