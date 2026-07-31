@@ -73,8 +73,8 @@ public class BookingService {
 
     }
 
-    public List<BookingResponse> findBookingsByUserId(Long user_id){
-        Users users = userRepository.findById(user_id).orElseThrow(() -> new ResourceNotFoundException("No user found with id: "+ user_id));
+    public List<BookingResponse> findMyBookings(Users users){
+
         List<Booking> bookings = bookingRepository.findByUsersId(users.getId());
 
         return bookings.stream()

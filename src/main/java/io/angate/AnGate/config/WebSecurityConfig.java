@@ -5,9 +5,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -21,6 +23,7 @@ import java.net.http.HttpRequest;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+@EnableMethodSecurity
 public class WebSecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
@@ -31,6 +34,7 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests((authorize)->
                         authorize
                                 .requestMatchers("/auth/**").permitAll()
+                                .requestMatchers(HttpMethod.GET,"/events/**").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter , UsernamePasswordAuthenticationFilter.class)

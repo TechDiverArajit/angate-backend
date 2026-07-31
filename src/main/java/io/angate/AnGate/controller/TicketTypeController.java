@@ -4,9 +4,11 @@ import io.angate.AnGate.dto.tickettype.TicketTypeRequest;
 import io.angate.AnGate.dto.tickettype.TicketTypeResponse;
 import io.angate.AnGate.repository.TicketTypeRepository;
 import io.angate.AnGate.service.TicketTypeService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,31 +18,34 @@ import java.util.List;
 public class TicketTypeController {
 
     private final TicketTypeService ticketTypeService;
-
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
     @GetMapping("/events/{eventId}/ticket-types")
     public ResponseEntity<List<TicketTypeResponse>> getTicketsByEventId(@PathVariable long eventId){
         return ResponseEntity.ok(ticketTypeService.getTicketsByEventId(eventId));
     }
-
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
     @GetMapping("/ticket-types/{id}")
     public ResponseEntity<TicketTypeResponse> getTicketById(@PathVariable Long id){
         return ResponseEntity.ok(ticketTypeService.getTicketById(id));
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/events/{eventId}/ticket-types")
-        public ResponseEntity<TicketTypeResponse> createTicketType(@RequestBody TicketTypeRequest ticketTypeRequest,
+        public ResponseEntity<TicketTypeResponse> createTicketType(@RequestBody @Valid TicketTypeRequest ticketTypeRequest,
                                                                    @PathVariable Long eventId){
         return new ResponseEntity<>(ticketTypeService.createTicketType(ticketTypeRequest , eventId), HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/ticket-types/delete/{id}")
-    public ResponseEntity<HttpStatus> deleteTicketType(@PathVariable Long id){
-        return ResponseEntity.ok(ticketTypeService.deleteTicketType(id));
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/ticket-types/{id}")
+    public ResponseEntity<Void> deleteTicketType(@PathVariable Long id){
+        ticketTypeService.deleteTicketType(id);
+        return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/ticket-types/update-ticket/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/ticket-types/{id}")
     public ResponseEntity<TicketTypeResponse> updatePartialTicket(@PathVariable Long id,
-                                                                  @RequestBody TicketTypeRequest request ){
+                                                                  @RequestBody @Valid TicketTypeRequest request ){
         return ResponseEntity.ok(ticketTypeService.updatePartialTicket(id,request));
     }
 }

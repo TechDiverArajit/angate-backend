@@ -52,14 +52,14 @@ public class TicketTypeService {
         return modelMapper.map(ticketTypeSaved,TicketTypeResponse.class);
     }
 
-    public HttpStatus deleteTicketType(Long id) {
+    public void deleteTicketType(Long id) {
         TicketType ticketType = ticketTypeRepository.findById(id)
                 .orElseThrow(()-> new ResourceNotFoundException("No ticketType Found"));
         if(bookingRepository.existsByTicketTypeId(ticketType.getId())){
             throw new BookingExistsDeletionException("Cannot delete the ticket because booking exists with ticket id: "+id);
         }
         ticketTypeRepository.delete(ticketType);
-        return HttpStatus.OK;
+
     }
 
     public TicketTypeResponse updatePartialTicket(Long id, TicketTypeRequest request) {
