@@ -47,7 +47,7 @@ public class BookingController {
 
     @PreAuthorize("hasAnyRole('ADMIN','USER')")
     @PostMapping("/createBooking")
-    public ResponseEntity<BookingResponse> bookAnEvent(@RequestBody BookingRequest bookingRequest ,
+    public ResponseEntity<BookingResponse> bookAnEvent(@RequestBody @Valid BookingRequest bookingRequest ,
                                                        @AuthenticationPrincipal Users users) throws InterruptedException {
         return new ResponseEntity<>(bookingService.bookAnEvent(bookingRequest , users), HttpStatus.CREATED);
     }

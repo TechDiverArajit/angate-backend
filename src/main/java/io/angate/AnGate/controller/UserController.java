@@ -9,6 +9,7 @@ import io.angate.AnGate.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,12 +32,12 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserResponse> register(@RequestBody UserRequest userRequest) throws Exception{
+    public ResponseEntity<UserResponse> register(@RequestBody @Valid UserRequest userRequest) throws Exception{
         return new ResponseEntity<>(userService.register(userRequest), HttpStatus.CREATED);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request){
+    public ResponseEntity<AuthResponse> login(@RequestBody @Valid AuthRequest request){
         return ResponseEntity.ok(userService.login(request));
     }
 

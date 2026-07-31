@@ -79,14 +79,10 @@ public class EventService {
     @Transactional
     @Scheduled(fixedRate = 60000)
     public void updateStatus() {
-        System.out.println("Scheduler running at " + LocalDateTime.now());
         LocalDateTime now = LocalDateTime.now();
         List<Event> events = eventRepository.findByStatusNotIn(
                 List.of(Event.Status.COMPLETED, Event.Status.CANCELLED)
         );
-        System.out.println("Events found: " + events.size());
-
-
         for (Event event : events) {
             Event.Status newStatus = event.fetchStatus();
 
