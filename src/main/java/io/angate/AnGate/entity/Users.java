@@ -32,8 +32,6 @@ public class Users extends BaseEntity implements UserDetails {
     @JsonIgnore
     private String password;
 
-    @Enumerated(EnumType.STRING)
-    private Gender gender;
 
     @Builder.Default
     @Enumerated(EnumType.STRING)
@@ -53,11 +51,6 @@ public class Users extends BaseEntity implements UserDetails {
         return this.emailId;
     }
 
-    public enum Gender{
-        MALE,
-        FEMALE,
-        PREFER_NOT_TO_SAY
-    }
 
     public enum Role {
         USER,

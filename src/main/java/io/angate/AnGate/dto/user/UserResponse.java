@@ -8,7 +8,6 @@ public class UserResponse {
     private Long id;
     private String fullName;
     private String emailId;
-    private Users.Gender gender;
 
 
 }

@@ -37,6 +37,7 @@ public class WebSecurityConfig {
                                 .requestMatchers(HttpMethod.GET,"/events/**").permitAll()
                                 .anyRequest().authenticated()
                 )
+                .cors(Customizer.withDefaults())
                 .addFilterBefore(jwtAuthFilter , UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .csrf(csrf -> csrf.disable());

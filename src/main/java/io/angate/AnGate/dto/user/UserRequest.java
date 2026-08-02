@@ -20,7 +20,5 @@ public class UserRequest {
     private String emailId;
     @Size(min = 8 , message = "Minimum 8 length password is required")
     private String password;
-    @NotBlank
-    private Users.Gender gender;
 
 }
