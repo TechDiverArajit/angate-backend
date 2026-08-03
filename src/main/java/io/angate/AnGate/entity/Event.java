@@ -32,6 +32,9 @@ public class Event extends BaseEntity {
     private Boolean active = true;
 
 
+    private String imageUrl;
+
+
     @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

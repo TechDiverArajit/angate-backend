@@ -28,6 +28,8 @@ public class EventRequest {
     @Future(message = "Start time must be in the future")
     private LocalDateTime startTime;
 
+    private String imageUrl;
+
     @NotEmpty(message = "At least one ticket type is required")
     @Valid
     private List<TicketTypeRequest> ticketTypes = new ArrayList<>();

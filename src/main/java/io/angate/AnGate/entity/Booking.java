@@ -26,12 +26,35 @@ public class Booking extends BaseEntity{
 
     @Builder.Default
     @Enumerated(EnumType.STRING)
-    private Status status = Status.CONFIRMED;
+    private Status status = Status.PENDING;
+
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    private PaymentStatus paymentStatus = PaymentStatus.PENDING;
+
+    private String razorpayOrderId;
+
+    private String razorpayPaymentId;
+
+    private String razorpaySignature;
+
+    @Column(unique = true)
+    private String bookingReference;
 
     public enum Status{
         PENDING,
         CONFIRMED,
+        REFUNDED
+    }
+
+    public enum PaymentStatus {
+
+        PENDING,
+
+        SUCCESS,
+
         FAILED,
+
         REFUNDED
     }
 

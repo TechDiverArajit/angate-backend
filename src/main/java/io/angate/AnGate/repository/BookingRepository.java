@@ -16,4 +16,6 @@ public interface BookingRepository extends JpaRepository<Booking , Long> {
     boolean existsByTicketTypeId(Long eventId);
 
     Optional<Booking> findByTicketTypeId(Long id);
+
+    Optional<Booking> findByRazorpayOrderId(String razorpayOrderId);
 }

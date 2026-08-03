@@ -1,0 +1,133 @@
+package io.angate.AnGate.service;
+
+import com.razorpay.Order;
+import com.razorpay.RazorpayClient;
+import com.razorpay.RazorpayException;
+import com.razorpay.Utils;
+import io.angate.AnGate.config.RazorpayConfig;
+import io.angate.AnGate.dto.Payment.PaymentVerificationRequest;
+import io.angate.AnGate.dto.booking.BookingRequest;
+import io.angate.AnGate.dto.booking.BookingResponse;
+import io.angate.AnGate.entity.Booking;
+import io.angate.AnGate.entity.TicketType;
+import io.angate.AnGate.entity.Users;
+import io.angate.AnGate.entity.enums.TicketStatus;
+import io.angate.AnGate.exception.ResourceNotFoundException;
+import io.angate.AnGate.repository.BookingRepository;
+import io.angate.AnGate.repository.TicketTypeRepository;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.util.UUID;
+
+@Service
+@Transactional
+@RequiredArgsConstructor
+public class PaymentService {
+
+    @Value("${razorpay.key.id}")
+    private String keyId;
+
+    private final RazorpayConfig razorpayConfig;
+
+
+    private final RazorpayClient razorpayClient;
+    private final BookingRepository bookingRepository;
+    private final TicketTypeRepository ticketTypeRepository;
+
+    public BookingResponse createOrder(BookingRequest bookingRequest , Users users) throws BadRequestException, RazorpayException {
+
+        try {
+            TicketType ticketType = ticketTypeRepository.findById(bookingRequest.getTicketTypeId())
+                    .orElseThrow(() -> new ResourceNotFoundException("No ticket found"));
+            if (ticketType.getStatus() != TicketStatus.ACTIVE) {
+                throw new BadRequestException("ticket is not available");
+            }
+            if (ticketType.getAvailableTickets() < bookingRequest.getQuantity()) {
+                throw new BadRequestException("sorry only " + ticketType.getAvailableTickets() + "available");
+            }
+
+            BigDecimal totalPrice = BigDecimal.valueOf(bookingRequest.getQuantity())
+                    .multiply(ticketType.getPrice());
+
+            Booking booking = Booking.builder()
+                    .users(users)
+                    .totalPrice(totalPrice)
+                    .quantity(bookingRequest.getQuantity())
+                    .ticketType(ticketType)
+                    .status(Booking.Status.PENDING)
+                    .paymentStatus(Booking.PaymentStatus.PENDING)
+                    .bookingReference(UUID.randomUUID().toString())
+                    .build();
+
+            long amount = totalPrice
+                    .multiply(BigDecimal.valueOf(100))
+                    .longValueExact();
+
+            JSONObject orderRequest = new JSONObject();
+            orderRequest.put("amount", amount);
+            orderRequest.put("currency", "INR");
+            orderRequest.put("receipt", "ANG-" + booking.getBookingReference());
+
+            bookingRepository.save(booking);
+            Order order = razorpayClient.orders.create(orderRequest);
+            booking.setRazorpayOrderId(order.get("id"));
+            booking = bookingRepository.save(booking);
+
+            BookingResponse response = new BookingResponse();
+            response.setTicketTypeId(booking.getTicketType().getId());
+            response.setId(booking.getId());
+            response.setUserId(users.getId());
+            response.setTotalPrice(totalPrice);
+            response.setStatus(booking.getStatus());
+            response.setPaymentStatus(booking.getPaymentStatus());
+            response.setEventTitle(ticketType.getEvent().getTitle());
+            response.setQuantity(booking.getQuantity());
+
+            response.setRazorpayOrderId(order.get("id"));
+            response.setAmount(amount);
+            response.setCurrency("INR");
+            response.setKey(keyId);
+
+            return response;
+        }catch (Exception e){
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    public void verifyPayment(PaymentVerificationRequest request) throws RazorpayException, BadRequestException {
+        Booking booking =  bookingRepository.findByRazorpayOrderId(request.getRazorpayOrderId())
+                .orElseThrow(()-> new ResourceNotFoundException("Booking not found"));
+
+        JSONObject object = new JSONObject();
+        object.put("razorpay_order_id",request.getRazorpayOrderId());
+        object.put("razorpay_payment_id",request.getRazorpayPaymentId());
+        object.put("razorpay_signature",request.getRazorpaySignature());
+
+        Boolean verified = Utils
+                .verifyPaymentSignature(object,razorpayConfig.getKeySecret());
+        if(!verified){
+            throw new BadRequestException("Invalid payment signature");
+        }
+        if (booking.getPaymentStatus() == Booking.PaymentStatus.SUCCESS) {
+            throw new BadRequestException("Payment already verified");
+        }
+        booking.setStatus(Booking.Status.CONFIRMED);
+        booking.setRazorpayPaymentId(request.getRazorpayPaymentId());
+        booking.setPaymentStatus(Booking.PaymentStatus.SUCCESS);
+        booking.setRazorpaySignature(request.getRazorpaySignature());
+
+        TicketType ticketType = booking.getTicketType();
+        ticketType.setAvailableTickets(
+                ticketType.getAvailableTickets()-booking.getQuantity()
+        );
+        ticketTypeRepository.save(ticketType);
+        bookingRepository.save(booking);
+    }
+}

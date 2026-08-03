@@ -17,6 +17,7 @@ public class EventResponse {
     private String venue;
     private LocalDateTime startTime;
     private Event.Status status;
+    private String imageUrl;
     private List<TicketTypeResponse> ticketTypes = new ArrayList<>();
 
 

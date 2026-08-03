@@ -48,6 +48,7 @@ public class UserService {
         Users userTobeSaved = modelMapper.map(userRequest, Users.class);
         userTobeSaved.setRole(Users.Role.USER);
         userTobeSaved.setStatus(UserStatus.ACTIVE);
+        userTobeSaved.setEmailId(userRequest.getEmailId().trim().toLowerCase());
         userTobeSaved.setPassword(passwordEncoder.encode(userRequest.getPassword()));
         Users user = userRepository.save(userTobeSaved);
         return modelMapper.map(user, UserResponse.class);

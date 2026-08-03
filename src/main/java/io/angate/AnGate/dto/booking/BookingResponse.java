@@ -10,8 +10,13 @@ public class BookingResponse {
     private Long id;
     private Long userId;
     private String eventTitle;
-    private Long TicketTypeId;
+    private Long ticketTypeId;
     private Integer quantity;
     private BigDecimal totalPrice;
-    private Booking.Status status ;
+    private Booking.Status status;
+    private Booking.PaymentStatus paymentStatus;
+    private String razorpayOrderId;
+    private Long amount;
+    private String currency;
+    private String key;;
 }
