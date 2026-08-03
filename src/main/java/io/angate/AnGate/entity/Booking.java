@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
 @Builder
@@ -28,6 +29,8 @@ public class Booking extends BaseEntity{
     @Enumerated(EnumType.STRING)
     private Status status = Status.PENDING;
 
+    private LocalDateTime expiryTime;
+
     @Builder.Default
     @Enumerated(EnumType.STRING)
     private PaymentStatus paymentStatus = PaymentStatus.PENDING;
@@ -41,9 +44,19 @@ public class Booking extends BaseEntity{
     @Column(unique = true)
     private String bookingReference;
 
+    @Column(unique = true)
+    private String ticketCode;
+
+    @Column(nullable = false)
+    private Boolean checkedIn = false;
+
+    private LocalDateTime checkedAt;
+
     public enum Status{
         PENDING,
         CONFIRMED,
+
+        EXPIRED,
         REFUNDED
     }
 

@@ -1,9 +1,11 @@
 package io.angate.AnGate.service;
 
+import com.google.zxing.WriterException;
 import com.razorpay.Order;
 import com.razorpay.RazorpayClient;
 import com.razorpay.RazorpayException;
 import com.razorpay.Utils;
+import io.angate.AnGate.Utility.QRCodeGenerator;
 import io.angate.AnGate.config.RazorpayConfig;
 import io.angate.AnGate.dto.Payment.PaymentVerificationRequest;
 import io.angate.AnGate.dto.booking.BookingRequest;
@@ -22,7 +24,9 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -63,6 +67,8 @@ public class PaymentService {
                     .status(Booking.Status.PENDING)
                     .paymentStatus(Booking.PaymentStatus.PENDING)
                     .bookingReference(UUID.randomUUID().toString())
+                    .expiryTime(LocalDateTime.now().plusMinutes(10))
+                    .checkedIn(false)
                     .build();
 
             long amount = totalPrice
@@ -74,10 +80,13 @@ public class PaymentService {
             orderRequest.put("currency", "INR");
             orderRequest.put("receipt", "ANG-" + booking.getBookingReference());
 
+
+            ticketType.setAvailableTickets(ticketType.getAvailableTickets()-booking.getQuantity());
             bookingRepository.save(booking);
             Order order = razorpayClient.orders.create(orderRequest);
             booking.setRazorpayOrderId(order.get("id"));
             booking = bookingRepository.save(booking);
+            ticketTypeRepository.save(ticketType);
 
             BookingResponse response = new BookingResponse();
             response.setTicketTypeId(booking.getTicketType().getId());
@@ -88,11 +97,12 @@ public class PaymentService {
             response.setPaymentStatus(booking.getPaymentStatus());
             response.setEventTitle(ticketType.getEvent().getTitle());
             response.setQuantity(booking.getQuantity());
-
+            response.setCreatedAt(booking.getCreatedAt());
             response.setRazorpayOrderId(order.get("id"));
             response.setAmount(amount);
             response.setCurrency("INR");
             response.setKey(keyId);
+            response.setImageUrl(booking.getTicketType().getEvent().getImageUrl());
 
             return response;
         }catch (Exception e){
@@ -110,7 +120,7 @@ public class PaymentService {
         object.put("razorpay_payment_id",request.getRazorpayPaymentId());
         object.put("razorpay_signature",request.getRazorpaySignature());
 
-        Boolean verified = Utils
+        boolean verified = Utils
                 .verifyPaymentSignature(object,razorpayConfig.getKeySecret());
         if(!verified){
             throw new BadRequestException("Invalid payment signature");
@@ -122,12 +132,19 @@ public class PaymentService {
         booking.setRazorpayPaymentId(request.getRazorpayPaymentId());
         booking.setPaymentStatus(Booking.PaymentStatus.SUCCESS);
         booking.setRazorpaySignature(request.getRazorpaySignature());
-
+        booking.setTicketCode("ANG-"+UUID.randomUUID());
+        booking.setCheckedIn(false);
         TicketType ticketType = booking.getTicketType();
         ticketType.setAvailableTickets(
                 ticketType.getAvailableTickets()-booking.getQuantity()
         );
         ticketTypeRepository.save(ticketType);
         bookingRepository.save(booking);
+    }
+
+    public byte[] generateBookingQr(Long bookingId) throws IOException, WriterException {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(()-> new ResourceNotFoundException("no bookings found"));
+        return QRCodeGenerator.generateQRCode(booking.getTicketCode());
     }
 }

@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.awt.print.Book;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,4 +19,5 @@ public interface BookingRepository extends JpaRepository<Booking , Long> {
     Optional<Booking> findByTicketTypeId(Long id);
 
     Optional<Booking> findByRazorpayOrderId(String razorpayOrderId);
+    List<Booking> findByStatusAndExpiryTimeBefore(Booking.Status status, LocalDateTime time);
 }

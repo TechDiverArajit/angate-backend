@@ -17,9 +17,11 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -63,6 +65,25 @@ public class BookingService {
     }
 
 
+    @Scheduled(fixedRate = 60000)
+    @Transactional
+    public void updatePendingBookings(){
+                                                            //find bookings which has PENDING status and ExpiryTime < NOW;
+        List<Booking> expiredBookings = bookingRepository.findByStatusAndExpiryTimeBefore(Booking.Status.PENDING , LocalDateTime.now());
+        for(Booking booking:expiredBookings){
+            TicketType ticketType = booking.getTicketType();
+            ticketType.setAvailableTickets(ticketType.getAvailableTickets()+booking.getQuantity());
+            booking.setPaymentStatus(Booking.PaymentStatus.FAILED);
+            booking.setStatus(Booking.Status.EXPIRED);
+            ticketTypeRepository.save(ticketType);
+        }
+
+        bookingRepository.saveAll(expiredBookings);
+    }
+
+
+
+
     public BookingResponse getBookingById(Long booking_id) {
         Booking booking = bookingRepository.findById(booking_id).orElseThrow(() -> new ResourceNotFoundException("No bookings found with id: "+ booking_id));
         BookingResponse bookingResponse = modelMapper.map(booking,BookingResponse.class);
@@ -83,6 +104,10 @@ public class BookingService {
                     bookingResponse.setUserId(booking.getUsers().getId());
                     bookingResponse.setTicketTypeId(booking.getTicketType().getId());
                     bookingResponse.setEventTitle(booking.getTicketType().getEvent().getTitle());
+                    bookingResponse.setRazorpayOrderId(booking.getRazorpayOrderId());
+                    bookingResponse.setPaymentStatus(booking.getPaymentStatus());
+                    bookingResponse.setBookingReference(booking.getBookingReference());
+                    bookingResponse.setImageUrl(booking.getTicketType().getEvent().getImageUrl());
                     return bookingResponse;
                 })
                 .collect(Collectors.toList());
