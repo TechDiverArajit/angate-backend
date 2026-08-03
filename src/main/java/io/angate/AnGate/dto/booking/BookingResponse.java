@@ -20,6 +20,7 @@ public class BookingResponse {
     private String imageUrl;
     private String razorpayOrderId;
     private String bookingReference;
+    private String emailId;
     private Long amount;
     private String currency;
     private String key;;

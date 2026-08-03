@@ -20,4 +20,6 @@ public interface BookingRepository extends JpaRepository<Booking , Long> {
 
     Optional<Booking> findByRazorpayOrderId(String razorpayOrderId);
     List<Booking> findByStatusAndExpiryTimeBefore(Booking.Status status, LocalDateTime time);
+
+    Optional<Booking> findByTicketCode(String ticketCode);
 }

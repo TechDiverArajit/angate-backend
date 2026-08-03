@@ -2,6 +2,8 @@ package io.angate.AnGate.controller;
 
 import com.google.zxing.WriterException;
 import com.razorpay.RazorpayException;
+import io.angate.AnGate.dto.Payment.CheckInRequest;
+import io.angate.AnGate.dto.Payment.CheckInResponse;
 import io.angate.AnGate.dto.Payment.PaymentVerificationRequest;
 import io.angate.AnGate.dto.booking.BookingRequest;
 import io.angate.AnGate.dto.booking.BookingResponse;
@@ -12,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,7 +39,7 @@ public class PaymentController {
     }
 
     @PostMapping("/verify")
-    public ResponseEntity<String> verifyPayment(@RequestBody PaymentVerificationRequest request) throws BadRequestException, RazorpayException {
+    public ResponseEntity<String> verifyPayment(@RequestBody PaymentVerificationRequest request) throws IOException, RazorpayException, WriterException {
         paymentService.verifyPayment(request);
         return ResponseEntity.ok("Payment Verified");
     }
@@ -46,4 +49,11 @@ public class PaymentController {
         byte[] qr = paymentService.generateBookingQr(bId);
         return ResponseEntity.ok(qr);
     }
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/checkIn")
+    public ResponseEntity<CheckInResponse> scan(@RequestBody CheckInRequest checkInRequest) throws BadRequestException {
+        return ResponseEntity.ok(paymentService.scan(checkInRequest));
+    }
+
+
 }

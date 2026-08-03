@@ -11,6 +11,7 @@ import java.io.IOException;
 
 public class QRCodeGenerator {
 
+    //this generates qr by taking ticketCode;
     public static byte[] generateQRCode(String text) throws WriterException  , IOException {
         QRCodeWriter writer = new QRCodeWriter();
 
