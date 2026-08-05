@@ -56,7 +56,7 @@ public class TicketTypeService {
         if(event.getStatus()== Event.Status.COMPLETED
                 || event.getStatus()== Event.Status.CANCELLED
                 || event.getStatus() == Event.Status.DELETED){
-            throw new BookingExistsDeletionException("Cannot update ticket event is already : "+ event.getStatus());
+            throw new BookingExistsDeletionException("Cannot create ticket event is already : "+ event.getStatus());
         }
 
         TicketType ticketType = modelMapper.map(ticketTypeRequest,TicketType.class);

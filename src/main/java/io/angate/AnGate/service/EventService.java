@@ -57,7 +57,7 @@ public class EventService {
 
     public Page<EventResponse> getAllEvent(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Event> events = eventRepository.findAll(pageable);
+        Page<Event> events = eventRepository.findByStatusNotIn( List.of(Event.Status.DELETED , Event.Status.CANCELLED), pageable);
         return events.map(event -> modelMapper.map(event, EventResponse.class));
 
     }
