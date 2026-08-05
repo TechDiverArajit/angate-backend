@@ -1,11 +1,13 @@
 package io.angate.AnGate.controller;
 
+import io.angate.AnGate.dto.tickettype.CreateTicketTypeRequest;
 import io.angate.AnGate.dto.tickettype.TicketTypeRequest;
 import io.angate.AnGate.dto.tickettype.TicketTypeResponse;
 import io.angate.AnGate.repository.TicketTypeRepository;
 import io.angate.AnGate.service.TicketTypeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -30,22 +32,21 @@ public class TicketTypeController {
     }
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/events/{eventId}/ticket-types")
-        public ResponseEntity<TicketTypeResponse> createTicketType(@RequestBody @Valid TicketTypeRequest ticketTypeRequest,
+        public ResponseEntity<TicketTypeResponse> createTicketType(@RequestBody @Valid CreateTicketTypeRequest ticketTypeRequest,
                                                                    @PathVariable Long eventId){
         return new ResponseEntity<>(ticketTypeService.createTicketType(ticketTypeRequest , eventId), HttpStatus.CREATED);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/ticket-types/{id}")
-    public ResponseEntity<Void> deleteTicketType(@PathVariable Long id){
+    public ResponseEntity<Void> deleteTicketType(@PathVariable Long id) throws BadRequestException {
         ticketTypeService.deleteTicketType(id);
         return ResponseEntity.noContent().build();
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/ticket-types/{id}")
-    public ResponseEntity<TicketTypeResponse> updatePartialTicket(@PathVariable Long id,
-                                                                  @RequestBody @Valid TicketTypeRequest request ){
+    public ResponseEntity<TicketTypeResponse> updatePartialTicket(@PathVariable Long id, @RequestBody @Valid TicketTypeRequest request ){
         return ResponseEntity.ok(ticketTypeService.updatePartialTicket(id,request));
     }
 }

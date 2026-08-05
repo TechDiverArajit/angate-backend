@@ -28,9 +28,7 @@ public class TicketType extends BaseEntity {
     @JoinColumn(name = "event_id" , nullable = false)
     @ManyToOne( fetch = FetchType.LAZY)
     private Event event;
-
     @Builder.Default
     @Enumerated(EnumType.STRING)
     private TicketStatus status = TicketStatus.ACTIVE;
-
 }

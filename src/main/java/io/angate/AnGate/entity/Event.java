@@ -35,10 +35,10 @@ public class Event extends BaseEntity {
     private String imageUrl;
 
 
-    @Builder.Default
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Status status = Status.UPCOMING;
+    private Status status;
 
     @JsonIgnore
     @OneToMany(mappedBy = "event" , cascade = CascadeType.ALL , orphanRemoval = true)
@@ -61,7 +61,8 @@ public class Event extends BaseEntity {
         UPCOMING,
         LIVE,
         COMPLETED,
-        CANCELLED
+        CANCELLED,
+        DELETED
     }
 
 

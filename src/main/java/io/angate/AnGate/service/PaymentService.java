@@ -141,12 +141,6 @@ public class PaymentService {
         booking.setTicketCode("ANG-"+UUID.randomUUID());
         booking.setCheckedIn(false);
         TicketType ticketType = booking.getTicketType();
-        ticketType.setAvailableTickets(
-                ticketType.getAvailableTickets()-booking.getQuantity()
-        );
-
-
-
         ticketTypeRepository.save(ticketType);
         bookingRepository.save(booking);
         System.out.println("Before sending email");

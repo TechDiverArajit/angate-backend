@@ -1,6 +1,7 @@
 package io.angate.AnGate.dto.tickettype;
 
 import io.angate.AnGate.entity.Event;
+import io.angate.AnGate.entity.enums.TicketStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
@@ -21,4 +22,6 @@ public class TicketTypeRequest {
     private BigDecimal price;
     @Positive(message = "Total tickets must be greater than 0")
     private Integer totalTickets;
+
+    private TicketStatus status;
 }

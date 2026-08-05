@@ -1,6 +1,8 @@
 package io.angate.AnGate.repository;
 
 import io.angate.AnGate.entity.Booking;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -12,7 +14,7 @@ import java.util.Optional;
 @Repository
 public interface BookingRepository extends JpaRepository<Booking , Long> {
 
-    List<Booking> findByUsersId(Long id);
+    Page<Booking> findByUsersId(Long id , Pageable pageable);
     boolean existsByTicketTypeEventId(Long eventId);
     boolean existsByTicketTypeId(Long eventId);
 

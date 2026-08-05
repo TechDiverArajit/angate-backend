@@ -1,6 +1,7 @@
 package io.angate.AnGate.dto.event;
 
 import io.angate.AnGate.dto.tickettype.TicketTypeRequest;
+import io.angate.AnGate.entity.Event;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.Data;

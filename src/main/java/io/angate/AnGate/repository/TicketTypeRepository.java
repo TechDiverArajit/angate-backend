@@ -10,4 +10,6 @@ import java.util.List;
 public interface TicketTypeRepository extends JpaRepository<TicketType,Long> {
 
     List<TicketType> findByEventId(Long eId);
+
+    long countByEventId(Long eventId);
 }

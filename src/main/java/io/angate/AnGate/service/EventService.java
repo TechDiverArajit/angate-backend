@@ -3,8 +3,10 @@ package io.angate.AnGate.service;
 import io.angate.AnGate.dto.event.EventRequest;
 import io.angate.AnGate.dto.event.EventResponse;
 
+import io.angate.AnGate.dto.event.EventUpdateRequest;
 import io.angate.AnGate.entity.Event;
 import io.angate.AnGate.entity.TicketType;
+import io.angate.AnGate.entity.enums.TicketStatus;
 import io.angate.AnGate.exception.BookingExistsDeletionException;
 import io.angate.AnGate.exception.ResourceNotFoundException;
 import io.angate.AnGate.repository.BookingRepository;
@@ -12,6 +14,7 @@ import io.angate.AnGate.repository.EventRepository;
 import io.angate.AnGate.repository.TicketTypeRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -40,6 +43,7 @@ public class EventService {
         for (TicketType ticketType : ticketTypesList) {
             ticketType.setEvent(eventTobeSaved);
             ticketType.setAvailableTickets(ticketType.getTotalTickets());
+            ticketType.setStatus(TicketStatus.ACTIVE);
         }
         Event event = eventRepository.save(eventTobeSaved);
         EventResponse eventResponse = modelMapper.map(event, EventResponse.class);
@@ -47,7 +51,7 @@ public class EventService {
     }
 
     public EventResponse getEventById(Long eventId) {
-        Event event = eventRepository.findById(eventId).orElseThrow();
+        Event event = eventRepository.findById(eventId).orElseThrow(() -> new ResourceNotFoundException("No event found"));
         return modelMapper.map(event, EventResponse.class);
     }
 
@@ -58,22 +62,45 @@ public class EventService {
 
     }
 
-    public EventResponse updateEvent(EventRequest eventRequest, Long event_id) {
-        if (!eventRepository.existsById(event_id)) {
-            throw new ResourceNotFoundException("not found event id: " + event_id);
-        }
-        Event event = modelMapper.map(eventRequest, Event.class);
-        event.setId(event_id);
-        event.setStatus(event.fetchStatus());
-        List<TicketType> ticketTypes = event.getTicketTypes();
-        for (TicketType ticketType : ticketTypes) {
-            ticketType.setAvailableTickets(ticketType.getTotalTickets());
-            ticketType.setEvent(event);
-        }
-        Event eventTobeSaved = eventRepository.save(event);
-        return modelMapper.map(eventTobeSaved, EventResponse.class);
+    public EventResponse updateEvent(EventUpdateRequest eventRequest, Long event_id) throws BadRequestException {
 
 
+        Event event = eventRepository.findById(event_id)
+                .orElseThrow(()-> new ResourceNotFoundException("No event found"));
+
+        if (event.getStatus() == Event.Status.COMPLETED ||
+                event.getStatus() == Event.Status.DELETED) {
+            throw new BadRequestException("Event is either completed or deleted");
+        }
+
+        if (eventRequest.getTitle() != null) {
+            event.setTitle(eventRequest.getTitle());
+        }
+
+        if (eventRequest.getDescription() != null) {
+            event.setDescription(eventRequest.getDescription());
+        }
+
+        if (eventRequest.getVenue() != null) {
+            event.setVenue(eventRequest.getVenue());
+        }
+
+        if (eventRequest.getImageUrl() != null) {
+            event.setImageUrl(eventRequest.getImageUrl());
+        }
+
+        if (eventRequest.getStartTime() != null) {
+            event.setStartTime(eventRequest.getStartTime());
+        }
+        if(eventRequest.getStatus()!=null){
+           if(eventRequest.getStatus()!= Event.Status.DELETED &&
+                   eventRequest.getStatus()!= Event.Status.CANCELLED){
+               throw new BadRequestException("\"Only CANCELLED and DELETED can be set manually.\"");
+           }
+            event.setStatus(eventRequest.getStatus());
+        }
+        eventRepository.save(event);
+        return modelMapper.map(event,EventResponse.class);
     }
 
     @Transactional
@@ -81,11 +108,10 @@ public class EventService {
     public void updateStatus() {
         LocalDateTime now = LocalDateTime.now();
         List<Event> events = eventRepository.findByStatusNotIn(
-                List.of(Event.Status.COMPLETED, Event.Status.CANCELLED)
+                List.of(Event.Status.COMPLETED, Event.Status.CANCELLED , Event.Status.DELETED)
         );
         for (Event event : events) {
             Event.Status newStatus = event.fetchStatus();
-
             if (event.getStatus() != newStatus) {
                 event.setStatus(newStatus);
             }
@@ -97,7 +123,7 @@ public class EventService {
         Event event = eventRepository.findById(e_id)
                 .orElseThrow(() -> new ResourceNotFoundException("No event found"));
         if (bookingRepository.existsByTicketTypeEventId(e_id)) {
-            throw new BookingExistsDeletionException("Cannot delete Event has bookings");
+            throw new BookingExistsDeletionException("Cannot delete Event with id: "+ event.getId() +" has bookings");
         }
         eventRepository.delete(event);
         return HttpStatus.OK;

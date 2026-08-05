@@ -1,9 +1,11 @@
 package io.angate.AnGate.controller;
 import io.angate.AnGate.dto.event.EventRequest;
 import io.angate.AnGate.dto.event.EventResponse;
+import io.angate.AnGate.dto.event.EventUpdateRequest;
 import io.angate.AnGate.service.EventService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,17 +40,23 @@ public class EventController {
 
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/{event_id}")
-    public ResponseEntity<EventResponse> updateEvent(@RequestBody @Valid EventRequest eventRequest,
-                                                     @PathVariable Long event_id ){
-        return new ResponseEntity<>(eventService.updateEvent(eventRequest , event_id ),HttpStatus.ACCEPTED);
+    @PatchMapping("/{event_id}")
+    public ResponseEntity<EventResponse> updateEvent(@RequestBody @Valid EventUpdateRequest updateRequest,
+                                                     @PathVariable Long event_id ) throws BadRequestException {
+        System.out.println("update hit");
+        return new ResponseEntity<>(eventService.updateEvent(updateRequest , event_id ),HttpStatus.ACCEPTED);
     }
+
+
 
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{e_id}")
     public ResponseEntity<HttpStatus> deleteAnEvent(@PathVariable Long e_id){
         return ResponseEntity.ok(eventService.deleteAnEvent(e_id));
+
     }
+
+
 
 }

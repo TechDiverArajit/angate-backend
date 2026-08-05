@@ -17,8 +17,14 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -78,6 +84,7 @@ public class BookingService {
             ticketTypeRepository.save(ticketType);
         }
 
+
         bookingRepository.saveAll(expiredBookings);
     }
 
@@ -90,15 +97,17 @@ public class BookingService {
         bookingResponse.setUserId(booking.getUsers().getId());
         bookingResponse.setTicketTypeId(booking.getTicketType().getId());
         bookingResponse.setEventTitle(booking.getTicketType().getEvent().getTitle());
+        bookingResponse.setEmailId(booking.getUsers().getEmailId());
         return bookingResponse;
 
     }
 
-    public List<BookingResponse> findMyBookings(Users users){
+    public Page<BookingResponse> findMyBookings(int page , int size , Users users){
+        Pageable pageable = PageRequest.of(page,size);
 
-        List<Booking> bookings = bookingRepository.findByUsersId(users.getId());
+        Page<Booking> bookings = bookingRepository.findByUsersId(users.getId(),pageable);
 
-        return bookings.stream()
+        return bookings
                 .map(booking -> {
                     BookingResponse bookingResponse = modelMapper.map(booking,BookingResponse.class);
                     bookingResponse.setUserId(booking.getUsers().getId());
@@ -107,10 +116,10 @@ public class BookingService {
                     bookingResponse.setRazorpayOrderId(booking.getRazorpayOrderId());
                     bookingResponse.setPaymentStatus(booking.getPaymentStatus());
                     bookingResponse.setBookingReference(booking.getBookingReference());
+                    bookingResponse.setEmailId(users.getEmailId());
                     bookingResponse.setImageUrl(booking.getTicketType().getEvent().getImageUrl());
                     return bookingResponse;
-                })
-                .collect(Collectors.toList());
+                });
     }
 
     @Transactional
@@ -140,16 +149,33 @@ public class BookingService {
         return bookingResponse;
     }
 
-    public List<BookingResponse> getAllBookings() {
-        List<Booking> bookings = bookingRepository.findAll();
-        return bookings.stream()
-                .map(booking -> {
+    public Page<BookingResponse> getAllBookings(int page , int size) {
+        Pageable pageable = PageRequest.of(page , size);
+        Page<Booking> bookings = bookingRepository.findAll(pageable);
+        return bookings.map(booking -> {
                     BookingResponse bookingResponse = modelMapper.map(booking,BookingResponse.class);
                     bookingResponse.setUserId(booking.getUsers().getId());
                     bookingResponse.setEventTitle(booking.getTicketType().getEvent().getTitle());
                     bookingResponse.setTicketTypeId(booking.getTicketType().getId());
+                    bookingResponse.setEmailId(booking.getUsers().getEmailId());
                     return bookingResponse;
-                })
-                .collect(Collectors.toList());
+                });
     }
+
+
+    public Page<BookingResponse> getBookingsByUserId(Long userId ,int page , int size) {
+        Pageable pageable = PageRequest.of(page,size);
+        Users user = userRepository.findById(userId)
+                .orElseThrow(()-> new ResourceNotFoundException("No user found"));
+        Page<Booking> bookings = bookingRepository.findByUsersId(userId , pageable);
+        return bookings.map(booking -> {
+            BookingResponse bookingResponse = modelMapper.map(booking,BookingResponse.class);
+            bookingResponse.setUserId(booking.getUsers().getId());
+            bookingResponse.setEmailId(booking.getUsers().getEmailId());
+            bookingResponse.setTicketTypeId(booking.getTicketType().getId());
+            bookingResponse.setEventTitle(booking.getTicketType().getEvent().getTitle());
+            return bookingResponse;
+        });
+    }
+
 }
