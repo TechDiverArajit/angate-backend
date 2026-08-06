@@ -13,6 +13,7 @@ import io.angate.AnGate.dto.Payment.PaymentVerificationRequest;
 import io.angate.AnGate.dto.booking.BookingRequest;
 import io.angate.AnGate.dto.booking.BookingResponse;
 import io.angate.AnGate.entity.Booking;
+import io.angate.AnGate.entity.Event;
 import io.angate.AnGate.entity.TicketType;
 import io.angate.AnGate.entity.Users;
 import io.angate.AnGate.entity.enums.TicketStatus;
@@ -54,7 +55,10 @@ public class PaymentService {
         try {
             TicketType ticketType = ticketTypeRepository.findById(bookingRequest.getTicketTypeId())
                     .orElseThrow(() -> new ResourceNotFoundException("No ticket found"));
-            if (ticketType.getStatus() != TicketStatus.ACTIVE) {
+
+            Event.Status eventStatus = ticketType.getEvent().getStatus();
+
+            if (ticketType.getStatus() != TicketStatus.ACTIVE || ( eventStatus != Event.Status.UPCOMING && eventStatus != Event.Status.LIVE )) {
                 throw new BadRequestException("ticket is not available");
             }
             if (ticketType.getAvailableTickets() < bookingRequest.getQuantity()) {

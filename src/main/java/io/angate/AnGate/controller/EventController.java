@@ -2,6 +2,7 @@ package io.angate.AnGate.controller;
 import io.angate.AnGate.dto.event.EventRequest;
 import io.angate.AnGate.dto.event.EventResponse;
 import io.angate.AnGate.dto.event.EventUpdateRequest;
+import io.angate.AnGate.entity.Event;
 import io.angate.AnGate.service.EventService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,8 +27,15 @@ public class EventController {
 
     @GetMapping
     public ResponseEntity<Page<EventResponse>> getAllEvent(@RequestParam(defaultValue = "0") int page,
-                                                            @RequestParam(defaultValue = "10") int size){
-        return ResponseEntity.ok(eventService.getAllEvent(page,size));
+                                                           @RequestParam(defaultValue = "10") int size ,
+                                                           @RequestParam(required = false) Event.Status status){
+        return ResponseEntity.ok(eventService.getAllEvent(page,size, status));
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<Page<EventResponse>> getAllEventForAdmins(@RequestParam(defaultValue = "0") int page,
+                                                           @RequestParam(defaultValue = "10") int size){
+        return ResponseEntity.ok(eventService.getAllEventForAdmins(page,size));
     }
 
 

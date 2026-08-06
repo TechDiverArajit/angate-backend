@@ -17,6 +17,7 @@ public interface EventRepository extends JpaRepository<Event , Long> {
 
 
     Page<Event> findByStatusNotIn(Collection<Event.Status> statuses , Pageable pageable);
+    Page<Event> findByStatus(Event.Status status, Pageable pageable);
 
 
 }

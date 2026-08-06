@@ -55,11 +55,21 @@ public class EventService {
         return modelMapper.map(event, EventResponse.class);
     }
 
-    public Page<EventResponse> getAllEvent(int page, int size) {
+    public Page<EventResponse> getAllEvent(int page, int size , Event.Status status) {
         Pageable pageable = PageRequest.of(page, size);
+        if(status!=null){
+            Page<Event> events = eventRepository.findByStatus(status , pageable);
+            return events.map(event -> modelMapper.map(event,EventResponse.class));
+        }
         Page<Event> events = eventRepository.findByStatusNotIn( List.of(Event.Status.DELETED , Event.Status.CANCELLED), pageable);
         return events.map(event -> modelMapper.map(event, EventResponse.class));
 
+    }
+
+    public Page<EventResponse> getAllEventForAdmins(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Event> events = eventRepository.findAll( pageable);
+        return events.map(event -> modelMapper.map(event, EventResponse.class));
     }
 
     public EventResponse updateEvent(EventUpdateRequest eventRequest, Long event_id) throws BadRequestException {
