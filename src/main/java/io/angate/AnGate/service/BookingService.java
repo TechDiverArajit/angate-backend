@@ -119,6 +119,7 @@ public class BookingService {
                     bookingResponse.setBookingReference(booking.getBookingReference());
                     bookingResponse.setEmailId(users.getEmailId());
                     bookingResponse.setImageUrl(booking.getTicketType().getEvent().getImageUrl());
+                    bookingResponse.setTicketName(booking.getTicketType().getName());
                     return bookingResponse;
                 });
     }

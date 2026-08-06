@@ -11,8 +11,10 @@ import io.angate.AnGate.exception.ResourceNotFoundException;
 import io.angate.AnGate.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -55,8 +57,6 @@ public class UserService {
     }
 
     public AuthResponse login(AuthRequest request) {
-//        Users user = userRepository.findByEmailId(request.getEmailId())
-//                .orElseThrow(()-> new ResourceNotFoundException("No user found with EmailID: "+request.getEmailId()));
         Authentication authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(request.getEmailId(), request.getPassword()));
         Users users = (Users) authentication.getPrincipal();
@@ -81,5 +81,16 @@ public class UserService {
     }
 
 
+    @Transactional
+    public UserResponse assignAdmin(Long id) {
+        Users user = userRepository.findById(id)
+                .orElseThrow(()-> new ResourceNotFoundException("No user found"));
+        if(user.getRole()== Users.Role.ADMIN){
+            throw new BookingExistsDeletionException("User is already an admin");
+        }
+        user.setRole(Users.Role.ADMIN);
+        user = userRepository.save(user);
+        return modelMapper.map(user,UserResponse.class);
+    }
 }
 

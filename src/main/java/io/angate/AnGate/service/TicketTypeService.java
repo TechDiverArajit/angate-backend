@@ -33,6 +33,7 @@ public class TicketTypeService {
     private final BookingRepository bookingRepository;
 
     public List<TicketTypeResponse> getTicketsByEventId(long eventId) {
+        Event event = eventRepository.findById(eventId).orElseThrow(()-> new ResourceNotFoundException("No event found"));
         List<TicketType> ticketTypes = ticketTypeRepository.findByEventId(eventId);
         return ticketTypes.stream()
                 .map(ticketType -> modelMapper.map(ticketType, TicketTypeResponse.class))

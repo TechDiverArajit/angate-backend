@@ -21,6 +21,7 @@ public class BookingResponse {
     private String razorpayOrderId;
     private String bookingReference;
     private String emailId;
+    private String ticketName;
     private Long amount;
     private String currency;
     private String key;;

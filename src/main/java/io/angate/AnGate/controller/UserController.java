@@ -4,6 +4,7 @@ import io.angate.AnGate.dto.Auth.AuthRequest;
 import io.angate.AnGate.dto.Auth.AuthResponse;
 import io.angate.AnGate.dto.user.UserRequest;
 import io.angate.AnGate.dto.user.UserResponse;
+import io.angate.AnGate.entity.Users;
 import io.angate.AnGate.exception.ResourceNotFoundException;
 import io.angate.AnGate.service.UserService;
 import jakarta.servlet.http.Cookie;
@@ -15,7 +16,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import java.lang.reflect.Array;
@@ -56,8 +60,6 @@ public class UserController {
 
     @PostMapping("/refresh")
     public ResponseEntity<AuthResponse> refresh(HttpServletRequest request){
-        System.out.println("Refresh endpoint reached");
-        System.out.println("Cookie header: " + request.getHeader("Cookie"));
         Cookie[] cookies = request.getCookies();
         if(cookies==null){
             throw new ResourceNotFoundException("No cookies found");
@@ -83,4 +85,5 @@ public class UserController {
         SecurityContextHolder.clearContext();
         return ResponseEntity.ok("Logout successfully");
     }
+
 }
