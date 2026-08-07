@@ -5,31 +5,36 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class EmailServiceImp implements EmailService {
 
-    private final JavaMailSender mailSender;
+    @Value("${brevo.api.key}")
+    private String brevoApiKey;
+
+    private final RestTemplate restTemplate = new RestTemplate();
+
+    private static final String BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 
     @Override
     public void sendBookingInformation(Booking booking, byte[] qr) {
 
 
         try {
-
-
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper =
-                    new MimeMessageHelper(message, true);
-
-            helper.setTo(booking.getUsers().getEmailId());
-
-            helper.setSubject("Booking Confirmed : " + booking.getBookingReference());
-
             String html = """
 <!DOCTYPE html>
 <html>
@@ -299,17 +304,34 @@ Please present the QR code at the event entrance for quick check-in.
                     booking.getQuantity(),
                     booking.getTotalPrice()
             );
-            helper.setFrom("angate.corp@gmail.com", "AnGate");
-            helper.setText(html , true);
-            helper.addInline("ticketQr",new ByteArrayResource(qr),"image/png");
-            helper.addAttachment("ticket-qr.png", new ByteArrayResource(qr));
-            mailSender.send(message);
+
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("api-key",brevoApiKey);
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("Accept", "application/json");
+
+            Map<String, Object> body = new HashMap<>();
+            body.put("sender", Map.of("name", "AnGate", "email", "angate.corp@gmail.com"));
+            body.put("to", List.of(Map.of("email", booking.getUsers().getEmailId())));
+            body.put("subject", "Booking Confirmed : " + booking.getBookingReference());
+            body.put("htmlContent", html);
+            body.put("attachment", List.of(
+                    Map.of(
+                            "content", Base64.getEncoder().encodeToString(qr),
+                            "name", "ticket-qr.png"
+                    )
+            ));
+
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
+            ResponseEntity<String> response =
+                    restTemplate.postForEntity(BREVO_API_URL, request, String.class);
+
+            System.out.println(response.getStatusCode());
+            System.out.println(response.getBody());
         }
         catch (Exception e) {
             e.printStackTrace();
         }
-
-
-
     }
 }
