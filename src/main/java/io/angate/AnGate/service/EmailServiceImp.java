@@ -299,7 +299,7 @@ Please present the QR code at the event entrance for quick check-in.
                     booking.getQuantity(),
                     booking.getTotalPrice()
             );
-
+            helper.setFrom("angate.corp@gmail.com", "AnGate");
             helper.setText(html , true);
             helper.addInline("ticketQr",new ByteArrayResource(qr),"image/png");
             helper.addAttachment("ticket-qr.png", new ByteArrayResource(qr));
