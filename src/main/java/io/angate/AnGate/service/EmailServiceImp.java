@@ -13,20 +13,11 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class EmailServiceImp implements EmailService {
 
-
-
-
-    @Value("${spring.mail.username}")
-    private String email;
-
-    @Value("${spring.mail.password}")
-    private String password;
     private final JavaMailSender mailSender;
 
     @Override
     public void sendBookingInformation(Booking booking, byte[] qr) {
-        System.out.println(email);
-        System.out.println(password);
+
 
         try {
 
