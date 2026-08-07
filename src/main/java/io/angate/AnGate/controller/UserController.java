@@ -48,8 +48,8 @@ public class UserController {
         AuthResponse authResponse = userService.login(request);
         ResponseCookie cookie = ResponseCookie.from("refreshToken", authResponse.getRefreshToken())
                 .httpOnly(true)
-                .secure(false)          // localhost
-                .sameSite("Lax")
+                .secure(true)          // localhost
+                .sameSite("None")
                 .path("/")
                 .maxAge(Duration.ofDays(7))
                 .build();
@@ -75,13 +75,15 @@ public class UserController {
 
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletResponse response){
-        Cookie cookie = new Cookie("refreshToken",null);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(false);
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
-        response.addCookie(cookie);
+        ResponseCookie responseCookie = ResponseCookie.from("refreshToken", "")
+                .httpOnly(true)
+                .sameSite("None")
+                .path("/")
+                .secure(true)
+                .maxAge(0)
+                .build();
 
+        response.addHeader(HttpHeaders.SET_COOKIE, responseCookie.toString());
         SecurityContextHolder.clearContext();
         return ResponseEntity.ok("Logout successfully");
     }
