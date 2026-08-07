@@ -1,5 +1,6 @@
 package io.angate.AnGate.service;
 import io.angate.AnGate.entity.Booking;
+import io.angate.AnGate.entity.Users;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -334,8 +335,195 @@ Please present the QR code at the event entrance for quick check-in.
         catch (Exception e) {
             e.printStackTrace();
         }
+    }
 
+    public void sendWelcomeEmail(Users user) {
+        try {
+            String html = """
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+body {
+    margin: 0;
+    padding: 40px 0;
+    background: #f5f5f7;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+}
 
+.wrapper {
+    width: 100%%;
+}
 
+.card {
+    max-width: 620px;
+    margin: auto;
+    background: #ffffff;
+    border-radius: 24px;
+    overflow: hidden;
+    border: 1px solid #e5e5e7;
+}
+
+.header {
+    text-align: center;
+    padding: 45px 40px;
+    border-bottom: 1px solid #efefef;
+}
+
+.logo {
+    font-size: 34px;
+    font-weight: 700;
+    color: #111;
+    letter-spacing: -1px;
+}
+
+.subtitle {
+    margin-top: 8px;
+    color: #6e6e73;
+    font-size: 16px;
+}
+
+.content {
+    padding: 40px;
+}
+
+.success {
+    font-size: 28px;
+    font-weight: 700;
+    color: #111;
+    margin-bottom: 10px;
+}
+
+.message {
+    color: #6e6e73;
+    line-height: 1.7;
+    margin-bottom: 35px;
+}
+
+.info {
+    border: 1px solid #ededed;
+    border-radius: 18px;
+    overflow: hidden;
+}
+
+.row {
+    display: flex;
+    justify-content: space-between;
+    padding: 18px 22px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.row:last-child {
+    border-bottom: none;
+}
+
+.label {
+    color: #8e8e93;
+    font-size: 14px;
+}
+
+.value {
+    color: #111;
+    font-weight: 600;
+}
+
+.notice {
+    margin-top: 30px;
+    background: #f7f7f8;
+    border-radius: 16px;
+    padding: 22px;
+    color: #555;
+    line-height: 1.7;
+}
+
+.footer {
+    padding: 30px;
+    text-align: center;
+    color: #999;
+    font-size: 13px;
+    border-top: 1px solid #efefef;
+}
+</style>
+</head>
+<body>
+
+<div class="wrapper">
+<div class="card">
+
+<div class="header">
+<div class="logo">
+🎟 AnGate
+</div>
+<div class="subtitle">
+Event Booking Platform
+</div>
+</div>
+
+<div class="content">
+
+<div class="success">
+Welcome to AnGate! 🎉
+</div>
+
+<div class="message">
+Hi %s,<br><br>
+Your account has been successfully created. We're thrilled to have you onboard! You can now explore upcoming events, book tickets seamlessly, and manage your reservations all in one place.
+</div>
+
+<div class="info">
+<div class="row">
+<div class="label">Account Email</div>
+<div class="value">%s</div>
+</div>
+
+<div class="row">
+<div class="label">Member Status</div>
+<div class="value">Active 🌟</div>
+</div>
+</div>
+
+<div class="notice">
+Ready to experience live events like never before?<br>
+Log in to your account and discover what's happening around you today.
+</div>
+
+</div>
+
+<div class="footer">
+© 2026 AnGate
+</div>
+
+</div>
+</div>
+
+</body>
+</html>
+""".formatted(
+                    user.getFullName(), // Replace with user.getUsername() or user.getFirstName() depending on your Users entity structure
+                    user.getEmailId()
+            );
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("api-key", brevoApiKey);
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("Accept", "application/json");
+
+            Map<String, Object> body = new HashMap<>();
+            body.put("sender", Map.of("name", "AnGate", "email", "angate.corp@gmail.com"));
+            body.put("to", List.of(Map.of("email", user.getEmailId())));
+            body.put("subject", "Welcome to AnGate – Your Account is Ready!");
+            body.put("htmlContent", html);
+
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
+            ResponseEntity<String> response = restTemplate.postForEntity(BREVO_API_URL, request, String.class);
+
+            System.out.println(response.getStatusCode());
+            System.out.println(response.getBody());
+            System.out.println("Welcome email sent successfully");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -37,6 +37,8 @@ public class UserService {
 
     private final JwtService jwtService;
 
+    private final EmailServiceImp emailServiceImp;
+
 
     public UserResponse getUserById(Long userId){
         Users user = userRepository.findById(userId).orElseThrow(()->new ResourceNotFoundException("No user exists"));
@@ -53,6 +55,7 @@ public class UserService {
         userTobeSaved.setEmailId(userRequest.getEmailId().trim().toLowerCase());
         userTobeSaved.setPassword(passwordEncoder.encode(userRequest.getPassword()));
         Users user = userRepository.save(userTobeSaved);
+        emailServiceImp.sendWelcomeEmail(user);
         return modelMapper.map(user, UserResponse.class);
     }
 
@@ -88,6 +91,7 @@ public class UserService {
         if(user.getRole()== Users.Role.ADMIN){
             throw new BookingExistsDeletionException("User is already an admin");
         }
+
         user.setRole(Users.Role.ADMIN);
         user = userRepository.save(user);
         return modelMapper.map(user,UserResponse.class);
