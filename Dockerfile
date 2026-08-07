@@ -7,4 +7,4 @@ COPY . .
 RUN chmod +x mvnw
 RUN ./mvnw clean package -DskipTests
 
-ENTRYPOINT ["java","-jar","target/AnGate-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java","-Xms128m","-Xmx256m","-jar","target/AnGate-0.0.1-SNAPSHOT.jar"]
