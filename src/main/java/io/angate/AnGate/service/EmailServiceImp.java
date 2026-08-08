@@ -219,7 +219,7 @@ body{
 <div class="header">
 
 <div class="logo">
-🎟 AnGate
+    <img src="https://www.image2url.com/r2/default/images/1786167015589-c897b810-d5d7-4572-9339-a292be8d1f38.svg" alt="AnGate Logo" style="height: 24px; vertical-align: middle; margin-right: 6px;"> AnGate
 </div>
 
 <div class="subtitle">
@@ -453,7 +453,7 @@ body {
 
 <div class="header">
 <div class="logo">
-🎟 AnGate
+    <img src="https://www.image2url.com/r2/default/images/1786167015589-c897b810-d5d7-4572-9339-a292be8d1f38.svg" alt="AnGate Logo" style="height: 24px; vertical-align: middle; margin-right: 6px;"> AnGate
 </div>
 <div class="subtitle">
 Event Booking Platform
